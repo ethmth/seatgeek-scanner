@@ -1,3 +1,5 @@
+#!/bin/python3
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -14,12 +16,15 @@ from dotenv import load_dotenv
 import re
 from datetime import date
 
+try:
+    load_dotenv()
+except:
+    pass
+
 os.system("rm available_tickets.txt")
 os.system("touch available_tickets.txt")
 
-load_dotenv()
-
-SHOW_PREFIX=os.getenv('SHOW_PREFIX')
+SHOW_PREFIX=os.environ['SHOW_PREFIX']
 
 if SHOW_PREFIX is None:
     try:
@@ -29,18 +34,17 @@ if SHOW_PREFIX is None:
         exit()
 
 
-BLINK_IP=os.getenv('BLINK_IP')
-IFTTT_KEY=os.getenv('IFTTT_KEY')
-IFTTT_EVENT=os.getenv('IFTTT_EVENT')
-IFTTT_MESSAGE=os.getenv('IFTTT_MESSAGE')
-DATE_RANGE=os.getenv('DATE_RANGE')
+BLINK_IP=os.environ['BLINK_IP']
+IFTTT_KEY=os.environ['IFTTT_KEY']
+IFTTT_EVENT=os.environ['IFTTT_EVENT']
+IFTTT_MESSAGE=os.environ['IFTTT_MESSAGE']
+DATE_RANGE=os.environ['DATE_RANGE']
 
 
 starting_date = date.today()
 ending_date = date(2049, 12, 31)
 
 def send_notification(course):
-    # print("Call no ", course.call_no)
 
     ifile=open("available_courses.txt" ,"r")
     lines = ifile.readlines()
@@ -49,8 +53,6 @@ def send_notification(course):
     request_sent = False
 
     for line in lines:
-        # print("line",line)
-        # print("course call no",course.call_no)
         if line[0:line.index("\n")] == course.call_no:
             request_sent = True
 
@@ -61,8 +63,6 @@ def send_notification(course):
         headers = CaseInsensitiveDict()
         headers["Accept"] = "application/json"
         headers["Content-Type"] = "application/json"
-
-        # print(f"Message: {IFTTT_MESSAGE} {course.course_title} {course.course_no} {course.section_no} {course.call_no} {course.status} {course.professor}")
 
         data = f"""
         {{
@@ -82,28 +82,19 @@ def send_notification(course):
         except:
             pass
 
-    # else:
-        # print(f"Request for {course.course_no} {course.section_no} already sent")
-
 
 def process_date_range():
 
     global starting_date
     global ending_date
 
-    # print(starting_date)
-    # print(ending_date)
-
     try:
         my_date = DATE_RANGE[0:8]
-        # print(my_date)
 
         year = int(my_date[0:4])
         month = int(my_date[4:6])
         day = int(my_date[6:8])
-        # print(year, month, day)
 
-        # if starting_date != None:
         starting_date= date(year,month,day)
 
     except:
@@ -121,35 +112,32 @@ def process_date_range():
     except:
         pass
 
-    # print(starting_date)
-    # print(ending_date)
-
 
 def main():
 
     process_date_range()
 
-    # time.sleep(500)
-
     try:
         user_agent = "Mozilla/5.0 (Windows NT 10.0; rv:103.0) Gecko/20100101 Firefox/103.0"
 
         options = webdriver.FirefoxOptions()
+        # options = webdriver.ChromeOptions()
+
         # options.headless = True
-        options.add_argument(f'user-agent={user_agent}')
-        options.add_argument("--window-size=1920,1080")
-        options.add_argument('--ignore-certificate-errors')
-        options.add_argument('--allow-running-insecure-content')
-        options.add_argument("--disable-extensions")
-        options.add_argument("--proxy-server='direct://'")
-        options.add_argument("--proxy-bypass-list=*")
-        options.add_argument("--start-maximized")
-        options.add_argument('--disable-gpu')
-        options.add_argument('--disable-dev-shm-usage')
-        options.add_argument('--no-sandbox')
+        # options.add_argument(f'user-agent={user_agent}')
+        # options.add_argument("--window-size=1920,1080")
+        # options.add_argument('--ignore-certificate-errors')
+        # options.add_argument('--allow-running-insecure-content')
+        # options.add_argument("--disable-extensions")
+        # options.add_argument("--proxy-server='direct://'")
+        # options.add_argument("--proxy-bypass-list=*")
+        # options.add_argument("--start-maximized")
+        # options.add_argument('--disable-gpu')
+        # options.add_argument('--disable-dev-shm-usage')
+        # options.add_argument('--no-sandbox')
 
+        # driver = webdriver.Chrome(options=options)
         driver = webdriver.Firefox(options=options)
-
 
         wait = WebDriverWait(driver, 10)
 
@@ -166,7 +154,6 @@ def main():
 
         # WHILE LOOP TO KEEP CLICKING "SHOW MORE DATES"
         while(event_links_present and presence_of_element_located((By.CLASS_NAME, "Typography__Text1-sc-7500c16d-6"))):
-            # show_more_dates_button = driver.find_element(by=By.CLASS_NAME, value="Typography__Text1-sc-7500c16d-6 jkUBWq")
             show_more_dates_button = driver.find_element(by=By.CLASS_NAME, value="Typography__Text1-sc-7500c16d-6")
             show_more_dates_button.click()
 
@@ -176,25 +163,12 @@ def main():
 
             print(itercount)
 
-            # time.sleep(500)
-
-            # for wrapper in month_wrappers:
-
-                # days = wrapper.find_elements(by=By.CLASS_NAME, value="CalendarEvents__Events-sc-19173feb-5")
-
-                # for day in days:
-                    # print("day")
-                # print("Wrapper found")
-                # print(wrapper.get_attribute("innerHTML"))
-
             month_name = last_month.find_element(by=By.CLASS_NAME, value="Typography__Heading3-sc-7500c16d-2")
             month_name = month_name.get_attribute("innerHTML")
             print(month_name)
 
-            # events = last_month.find_elements(by=By.XPATH,value="//a[contains(@class, 'CalendarEvents__EventLink')]")
             events = last_month.find_elements(by=By.CLASS_NAME, value="CalendarEvents__EventLink-sc-19173feb-7")
             if(len(events) == 0):
-                # print("length = 0")
                 event_links_present = False
                 break
 
@@ -219,9 +193,6 @@ def main():
                             print("Reached limit")
                             event_links_present = False
                             break
-
-
-
 
                     except:
                         pass

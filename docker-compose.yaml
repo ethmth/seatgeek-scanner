@@ -5,5 +5,13 @@ services:
     build:
       context: .
     container_name: seatgeek
+    environment:
+      - SHOW_PREFIX=${SHOW_PREFIX}
+      - BLINK_IP=${BLINK_IP}
+      - IFTTT_KEY=${IFTTT_KEY}
+      - IFTTT_EVENT=${IFTTT_EVENT}
+      - IFTTT_MESSAGE=${IFTTT_MESSAGE}
+      - DATE_RANGE=${DATE_RANGE}
+      - TARGET_PRICE=${TARGET_PRICE}
     #volumes:
     #  - ./shared:/opt/shared/

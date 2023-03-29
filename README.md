@@ -64,5 +64,3 @@ docker-compose up -d
 (Stop the background container by entering the repo directory and running `docker-compose stop`)
 
 The docker container will run, continuously scanning Seatgeek to check whether tickets for the show you specified, within the date range specified, fall below the target price. If so, the IFTTT event specified in the `.env` file is triggered, and if you provided a Blink IP, a request will be sent to that as well.
-
-test
